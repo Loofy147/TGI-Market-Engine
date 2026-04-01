@@ -4,44 +4,52 @@ from typing import Dict, Iterator
 
 class TickDataProvider:
     """
-    Simulates 1-second BTC/USD tick data.
-    Provides price delta, volume acceleration, liquidity imbalance, and volatility.
+    Simulates high-velocity BTC/USD tick data for the Z_64^4 Manifold.
+    Provides r1-r4 mapped financial proxies.
     """
     def __init__(self, base_price: float = 65000.0):
         self.price = base_price
-        self.vol_accel = 100.0
-        self.liq_imbalance = 0.0
-        self.volatility = 0.02
+        self.vol_velocity = 100.0
+        self.flow_imbalance = 0.0
+        self.time_decay = 0.01
 
     def get_tick(self) -> Dict:
         """
-        Generates a single tick with randomized movement.
+        Generates a single tick for BTC.
         """
-        # Price Delta: -10 to +10
-        price_delta = random.uniform(-10.0, 10.0)
+        # Price Delta: -500 to +500 (Volatile range)
+        price_delta = random.uniform(-500.0, 500.0)
         self.price += price_delta
 
-        # Vol Accel: 50 to 500
-        self.vol_accel = random.uniform(50.0, 500.0)
+        # Vol Velocity: 50 to 1000
+        self.vol_velocity = random.uniform(50.0, 1000.0)
 
-        # Liq Imbalance: -1.0 to 1.0 (delta between bid/ask depth)
-        self.liq_imbalance = random.uniform(-1.0, 1.0)
+        # Flow Imbalance (Bid vs Ask Depth): -1.0 to 1.0
+        self.flow_imbalance = random.uniform(-1.0, 1.0)
 
-        # Volatility: 0.01 to 0.1
-        self.volatility = random.uniform(0.01, 0.1)
+        # Time Decay/Volatility component: 0.001 to 0.1
+        self.time_decay = random.uniform(0.001, 0.1)
 
         return {
             "price_delta": price_delta,
-            "vol_accel": self.vol_accel,
-            "liq_imbalance": self.liq_imbalance,
-            "volatility": self.volatility,
+            "vol_velocity": self.vol_velocity,
+            "flow_imbalance": self.flow_imbalance,
+            "time_decay": self.time_decay,
             "current_price": self.price
         }
 
-    def stream_ticks(self, interval: float = 1.0) -> Iterator[Dict]:
+    def simulate_volatility_spike(self, duration: int = 10) -> Iterator[Dict]:
         """
-        Generator for a stream of ticks.
+        Simulates a volatility breakout.
         """
-        while True:
-            yield self.get_tick()
-            time.sleep(interval)
+        for i in range(duration):
+            # Increasingly large price moves and volume velocity
+            price_delta = 500.0 + (i * 100.0)
+            self.price += price_delta
+            yield {
+                "price_delta": price_delta,
+                "vol_velocity": 1000.0 + (i * 200.0),
+                "flow_imbalance": 0.5 + (i * 0.05),
+                "time_decay": 0.1 + (i * 0.01),
+                "current_price": self.price
+            }

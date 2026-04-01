@@ -1,37 +1,37 @@
-import math
+import numpy as np
 
-class LSHEncoder:
+class BTCTopologicalEncoder:
     """
-    Projects live tick data onto the Z_m^4 Torus.
-    Quantizes continuous market signals into discrete residues r_1, r_2, r_3, r_4.
+    Projecting BTC Market Dynamics into the Z_64^4 Manifold.
+    Uses Locality Sensitive Hashing (LSH) to preserve market symmetry.
     """
-    def __init__(self, m: int = 1024):
+    def __init__(self, m: int = 64):
         self.m = m
+        # Deterministic seed for reproducibility in testing
+        np.random.seed(42)
+        # Projection vectors for the 4 dimensions
+        self.projection_matrix = np.random.randn(4, 4)
 
-    def quantize(self, value: float, min_val: float, max_val: float) -> int:
+    def encode_tick(self, price_delta: float, vol_velocity: float, flow_imbalance: float, time_decay: float) -> tuple:
         """
-        Maps a continuous value to a residue r in [0, m-1].
+        Encodes a BTC tick into the 4-dimensional residue vector (r1, r2, r3, r4).
         """
-        if max_val == min_val:
-            return 0
+        # 1. Normalize and Vectorize
+        raw_state = np.array([price_delta, vol_velocity, flow_imbalance, time_decay])
 
-        # Normalize to [0, 1]
-        normalized = (value - min_val) / (max_val - min_val)
-        normalized = max(0.0, min(1.0, normalized))
+        # 2. Symmetry-Preserving Transform
+        # Projecting semantic market features onto the manifold coordinates
+        projected = np.dot(self.projection_matrix, raw_state)
 
-        # Scale to [0, m-1]
-        residue = int(round(normalized * (self.m - 1)))
-        return residue % self.m
+        # 3. Discretization into the Z_m^4 Torus
+        # Each coordinate must be an integer in [0, m-1]
+        # We use a scaling factor to ensure we capture nuance before modulus
+        coords = np.mod(np.floor(projected * 10).astype(int), self.m)
 
-    def encode_tick(self, price_delta: float, vol_accel: float, liq_imbalance: float, volatility: float,
-                    ranges: dict) -> tuple:
-        """
-        Encodes a single tick into the 4-dimensional residue vector (r1, r2, r3, r4).
-        'ranges' should provide (min, max) for each dimension for normalization.
-        """
-        r1 = self.quantize(price_delta, *ranges['price_delta'])
-        r2 = self.quantize(vol_accel, *ranges['vol_accel'])
-        r3 = self.quantize(liq_imbalance, *ranges['liq_imbalance'])
-        r4 = self.quantize(volatility, *ranges['volatility'])
+        # Convert to tuple for hashability/immutability
+        residues = tuple(coords.tolist())
 
-        return (r1, r2, r3, r4)
+        # 4. Global Parity
+        parity_sum = sum(residues) % self.m
+
+        return residues, parity_sum
