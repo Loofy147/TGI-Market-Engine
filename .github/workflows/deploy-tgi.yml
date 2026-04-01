@@ -10,10 +10,10 @@ jobs:
   validate-topology:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
@@ -23,8 +23,9 @@ jobs:
           pip install numpy pytest
 
       - name: Run TGI Kernel Stress Tests
-        # Verifies Thm 3.2, 5.1, and H2 Obstruction logic
-        run: pytest tests/test_tgi_kernel.py
+        run: |
+          export PYTHONPATH=$PYTHONPATH:.
+          pytest tests/test_tgi_kernel.py
 
   deploy-to-stratosphere:
     needs: validate-topology
@@ -34,4 +35,3 @@ jobs:
       - name: Deploy to Moaziz Execution Layer
         run: |
           echo "Deploying TGI Mind to Stratos Monorepo..."
-          # Specific deployment commands (e.g., docker push, fly deploy) would go here.

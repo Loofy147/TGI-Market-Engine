@@ -3,6 +3,10 @@
 ## Overview
 This engine implements the TGI Mind logic for the STRATOS monorepo, providing O(1) algebraic deduction for market states.
 
+## Documentation
+- **[Technical Manual](docs/TECHNICAL_MANUAL.md):** Detailed architectural and signal logic.
+- **[Theoretical Basis](docs/THEORY.md):** The underlying FSO and torus manifold theory.
+
 ## Core Components
 - **Kernel (`src/tgi/kernel.py`):** The "Algebraic Mind" that projects features onto the Z_m^4 torus.
 - **Oracle (`src/tgi/oracle.py`):** The "Execution Adapter" that links the kernel to live feeds and deduces hidden flows.
