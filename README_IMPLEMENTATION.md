@@ -23,3 +23,22 @@ print(analysis['status']) # PROTECTED, H2_OBSTRUCTION_COLLAPSE, etc.
 ## Configuration
 - BTC: m=64 (Thin Fibers / High Velocity)
 - Gold: m=256 (Thick Fibers / Deep Liquidity)
+
+## Electricity Execution Layer
+The **Moaziz-TGI Execution Layer** (Electricity Algorithm) is a deterministic, $O(1)$ system that trades **Symmetry Breaks** rather than price patterns.
+
+### Components
+- **Electricity Engine (`src/tgi/electricity.py`):** Calculates the **Distance to Obstruction ($\mathcal{D}_{\Omega}$)** across multiple timeframes to identify manifold state.
+- **Residue Watcher (`scripts/residue_watcher.py`):** CLI tool for real-time topological analysis of price data.
+
+### Usage
+Run the Residue Watcher to analyze a specific asset's timeframe prices:
+```bash
+python3 scripts/residue_watcher.py --asset GOLD --m 256 --k 2 --p15m 2745.5 --p5m 2744.8 --p1m 2748.0
+```
+
+### Logic Gates
+- **Coprime ($\mathcal{D}_{\Omega} \le 0.05$):** Go/Hold.
+- **Shared Factors ($0.05 < \mathcal{D}_{\Omega} \le 0.15$):** Caution (Tighten Stops).
+- **Singularity ($\mathcal{D}_{\Omega} > 0.20$):** Immediate Exit/Reverse.
+- **Trapdoor:** Exit immediately if the 1m residue $\gcd(R_1, m) \ge m/8$.
