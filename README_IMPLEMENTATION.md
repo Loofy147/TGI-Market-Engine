@@ -77,3 +77,27 @@ Run the non-commutative strategy backtest:
 ```bash
 python3 scripts/twisted_backtest.py
 ```
+
+## Hilbert Stratification (Continuous Eigenstate Execution)
+By pushing $k \to \infty$, the TGI Mind eliminates artificial timeframe constraints. The market is mapped into an infinite-dimensional **Hilbert Space**, where price is a continuous wave function $\Psi$.
+
+### Components
+- **Hilbert Kernel (`src/tgi/hilbert.py`):** Evolves a complex wave function based on tick interactions. Identifies the natural, zero-energy **eigenstates** (resting frequencies) of the asset.
+- **Wave Watcher (`scripts/wave_watcher.py`):** Visualizes the resonant frequencies and probability density of the price-manifold.
+- **Hilbert Backtester (`scripts/hilbert_backtest.py`):** Executes trades at the exact mathematical nodes of the wave function, achieving zero search latency.
+
+### Logic & Signals
+- **Eigenstate Probability ($\mathcal{P}$):** The strength of a resonant node. $\mathcal{P} = |\Psi|^2$.
+- **Market Energy ($\mathcal{E}$):** Expectation value of the Hamiltonian. $\mathcal{E} > 0.5$ signals a **Phase Shift** (manifold breakage).
+- **Status: STABLE_EIGENSTATE ($\mathcal{E} < 0.1$):** Laminar flow; price is bound to a resonant frequency.
+- **Signal: MATERIALIZE_LIQUIDITY:** Place limit orders at core eigenstate nodes.
+
+### Usage
+Watch the live price wave function:
+```bash
+python3 scripts/wave_watcher.py --asset BTCUSD --ticks 10
+```
+Run the Hilbert-based eigenstate backtest:
+```bash
+python3 scripts/hilbert_backtest.py
+```
