@@ -54,3 +54,26 @@ Run the electricity-based backtest to validate the $O(1)$ trading strategy:
 python3 scripts/electricity_backtest.py
 ```
 This simulation tests **Trapdoor Exits**, **Coordinated Reset entries**, and **Wall Sniping** logic.
+
+## Non-Commutative Execution Layer (Twisted Fiber)
+The **Twisted Fiber** engine transcends price patterns by trading the **Non-Abelian holonomy** of order flow. It treats buy and sell sequences as non-commutative operators in SL(2, R).
+
+### Components
+- **Non-Commutative Kernel (`src/tgi/non_commutative.py`):** Represents the market state as a $2 \times 2$ matrix. Buy ticks are upper triangular; Sell ticks are lower triangular.
+- **Holonomy Watcher (`scripts/holonomy_watcher.py`):** Monitors the "Twist" in the order book's fiber—a geometric phase shift revealing hidden institutional accumulation.
+- **Twisted Backtester (`scripts/twisted_backtest.py`):** Simulates path-dependent liquidity flow and demonstrates the "Front-Run" edge on structural snaps.
+
+### Logic & Signals
+- **Holonomy ($\mathcal{H}$):** The deviation of the manifold state from the identity. $\mathcal{H} = |\text{Tr}(M) - 2|$.
+- **Status: TWISTED_ACCUMULATION ($\mathcal{H} > 0.1$):** Hidden institutional pressure.
+- **Status: SINGULAR_SNAP_IMMINENT ($\mathcal{H} > 0.5$):** Structural imbalance reached; trend reversal/expansion likely.
+
+### Usage
+Analyze the holonomy of a live tick stream:
+```bash
+python3 scripts/holonomy_watcher.py --asset XAUUSD --ticks 10
+```
+Run the non-commutative strategy backtest:
+```bash
+python3 scripts/twisted_backtest.py
+```
