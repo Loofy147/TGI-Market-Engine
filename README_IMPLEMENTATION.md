@@ -42,3 +42,15 @@ python3 scripts/residue_watcher.py --asset GOLD --m 256 --k 2 --p15m 2745.5 --p5
 - **Shared Factors ($0.05 < \mathcal{D}_{\Omega} \le 0.15$):** Caution (Tighten Stops).
 - **Singularity ($\mathcal{D}_{\Omega} > 0.20$):** Immediate Exit/Reverse.
 - **Trapdoor:** Exit immediately if the 1m residue $\gcd(R_1, m) \ge m/8$.
+
+### Sniping Protocol
+The engine identifies **Parity Walls** where total obstruction occurs ($\gcd(R, m) = m$).
+- **Limit Orders:** Place orders 0.20 ticks before the wall to catch symmetry-break bounces.
+- **Verification:** Use the `ElectricityEngine.find_nearest_parity_walls()` method to locate these obstructions relative to the current price.
+
+### Backtesting
+Run the electricity-based backtest to validate the $O(1)$ trading strategy:
+```bash
+python3 scripts/electricity_backtest.py
+```
+This simulation tests **Trapdoor Exits**, **Coordinated Reset entries**, and **Wall Sniping** logic.

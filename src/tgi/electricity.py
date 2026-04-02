@@ -1,5 +1,5 @@
 import math
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Tuple
 
 class ElectricityEngine:
     """
@@ -48,7 +48,7 @@ class ElectricityEngine:
         Deduces trade action based on D_Omega and execution protocols.
         """
         # Protocol 1: The Trapdoor (Exit)
-        # If gcd(R1, m) >= m/8, exit immediately.
+        # If gcd(R1, m) >= m/8, exit immediately. (m=256 -> 32)
         r1 = residues.get("1m", 0)
         if math.gcd(r1, self.m) >= (self.m // 8):
             return "IMMEDIATE EXIT (Trapdoor Snapped)"
@@ -60,6 +60,24 @@ class ElectricityEngine:
             return "Tighten Stops"
         else:
             return "Hold/Trend Follow"
+
+    def find_nearest_parity_walls(self, current_price: float) -> Tuple[float, float]:
+        """
+        Identifies prices where floor(P * 10^k) % m == 0 (Total Obstruction).
+        Returns (lower_wall, upper_wall).
+        """
+        scale = 10 ** self.k
+        current_val = current_price * scale
+
+        # N * m <= floor(P * 10^k) < (N+1) * m
+        # We want the price where floor(P * 10^k) is exactly N * m or (N+1) * m
+        lower_n = math.floor(current_val / self.m)
+        upper_n = lower_n + 1
+
+        lower_wall = (lower_n * self.m) / scale
+        upper_wall = (upper_n * self.m) / scale
+
+        return lower_wall, upper_wall
 
     def analyze(self, prices: Dict[str, float]) -> Dict[str, Any]:
         """
@@ -73,6 +91,17 @@ class ElectricityEngine:
         # Sniping Zone Check (gcd(R, m) == m means R % m == 0)
         is_sniping_zone = any(math.gcd(r, self.m) == self.m for r in residues.values())
 
+        # Parity Wall Sniping (Based on 1m price)
+        p1m = prices.get("1m", 0.0)
+        lower_wall, upper_wall = self.find_nearest_parity_walls(p1m)
+
+        # Limit Orders 0.20 ticks before the wall
+        tick_size = 1.0 / (10 ** self.k)
+        sniping_levels = {
+            "lower": lower_wall + (0.20 * tick_size),
+            "upper": upper_wall - (0.20 * tick_size)
+        }
+
         # Coordinated Reset Check
         all_coprime = all(math.gcd(r, self.m) == 1 for r in residues.values())
 
@@ -82,5 +111,7 @@ class ElectricityEngine:
             "state": state,
             "action": action,
             "is_sniping_zone": is_sniping_zone,
-            "all_coprime": all_coprime
+            "all_coprime": all_coprime,
+            "sniping_levels": sniping_levels,
+            "parity_walls": (lower_wall, upper_wall)
         }

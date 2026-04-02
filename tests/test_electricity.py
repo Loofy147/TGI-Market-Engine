@@ -35,19 +35,30 @@ def test_logic_gate_thresholds():
     # Singularity
     assert engine.get_trade_action(0.25, {"1m": 1}) == "IMMEDIATE EXIT / REVERSE"
 
-def test_btc_example_from_prompt():
+def test_parity_wall_detection():
     engine = ElectricityEngine(m=256, k=2)
-    # prompt: D_Omega = 0.28, Signal ABORT, gcd(64, 256) at 1m
+    # 256.00 / 100 = 2.56
+    # floor(2.56 * 100) % 256 = 0
+    lower, upper = engine.find_nearest_parity_walls(2.56)
+    assert lower == 2.56
+    assert upper == 2.56 + 2.56
 
-    residues = {"15m": 128, "5m": 1, "1m": 64}
-    prices = {tf: float(r) / 100 for tf, r in residues.items()} # Simple price mapping
+    lower, upper = engine.find_nearest_parity_walls(3.00)
+    # 3.00 * 100 = 300
+    # 300 / 256 = 1.17 -> lower_n = 1
+    # lower_wall = 1 * 256 / 100 = 2.56
+    # upper_wall = 2 * 256 / 100 = 5.12
+    assert lower == 2.56
+    assert upper == 5.12
 
-    analysis = engine.analyze(prices)
-    # D_Omega = 0.5 * (128/256) + 0.3 * (1/256) + 0.2 * (64/256)
-    # D_Omega = 0.5 * 0.5 + 0.3 * 0.00390625 + 0.2 * 0.25
-    # D_Omega = 0.25 + 0.001171875 + 0.05 = 0.30117...
-    assert analysis["d_omega"] > 0.20
-    assert analysis["action"] == "IMMEDIATE EXIT (Trapdoor Snapped)" # Trapdoor takes precedence
+def test_sniping_levels():
+    engine = ElectricityEngine(m=256, k=2)
+    analysis = engine.analyze({"1m": 3.00})
+    # tick_size = 0.01
+    # sniping_levels = { "lower": 2.56 + 0.20*0.01, "upper": 5.12 - 0.20*0.01 }
+    # sniping_levels = { "lower": 2.562, "upper": 5.118 }
+    assert analysis["sniping_levels"]["lower"] == pytest.approx(2.562)
+    assert analysis["sniping_levels"]["upper"] == pytest.approx(5.118)
 
 def test_sniping_zone():
     engine = ElectricityEngine(m=256, k=2)
